@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
+import StarRating from "./StarRating";
 
-const tempMovieData = [
-    {
-        imdbID: "tt1375666",
-        Title: "Inception",
-        Year: "2010",
-        Poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    },
-    {
-        imdbID: "tt0133093",
-        Title: "The Matrix",
-        Year: "1999",
-        Poster: "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
-    },
-    {
-        imdbID: "tt6751668",
-        Title: "Parasite",
-        Year: "2019",
-        Poster: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
-    },
-];
+// const tempMovieData = [
+//     {
+//         imdbID: "tt1375666",
+//         Title: "Inception",
+//         Year: "2010",
+//         Poster: "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
+//     },
+//     {
+//         imdbID: "tt0133093",
+//         Title: "The Matrix",
+//         Year: "1999",
+//         Poster: "https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_SX300.jpg",
+//     },
+//     {
+//         imdbID: "tt6751668",
+//         Title: "Parasite",
+//         Year: "2019",
+//         Poster: "https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SX300.jpg",
+//     },
+// ];
 
 const tempWatchedData = [
     {
@@ -42,6 +43,8 @@ const tempWatchedData = [
     },
 ];
 
+const KEY = "6e823df3";
+
 const average = (arr) => arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
@@ -51,7 +54,6 @@ export default function App() {
     const [error, setError] = useState("");
     const [query, setQuery] = useState("inception");
     const [selectedId, setSelectedId] = useState(null);
-    const KEY = "6e823df3";
 
     function handleChangeQuery(e) {
         setQuery(e.target.value);
@@ -71,7 +73,7 @@ export default function App() {
                 try {
                     setIsLoading(true);
                     setError("");
-                    const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&?t=inception&s=${query}`);
+                    const res = await fetch(`http://www.omdbapi.com/?apikey=${KEY}&s=${query}`);
                     if (!res.ok) throw new Error("Something Went Wrong!!!");
 
                     const data = await res.json();
@@ -105,7 +107,9 @@ export default function App() {
             <Main>
                 <Box>
                     {isLoading && <Loader />}
-                    {!isLoading && !error && <MovieList movies={movies} onSelectMovie={handleSelectedMovie} />}
+                    {!isLoading && !error && (
+                        <MovieList movies={movies} onSelectMovie={handleSelectedMovie} />
+                    )}
                     {error && <ErrorMessage message={error} />}
                 </Box>
                 <Box>
@@ -154,7 +158,15 @@ function Logo() {
 }
 
 function SearchBar({ query, onChangeQuery }) {
-    return <input className="search" type="text" placeholder="Search movies..." value={query} onChange={onChangeQuery} />;
+    return (
+        <input
+            className="search"
+            type="text"
+            placeholder="Search movies..."
+            value={query}
+            onChange={onChangeQuery}
+        />
+    );
 }
 
 function SearchResult({ movies }) {
@@ -208,12 +220,76 @@ function Movie({ movie, onSelectMovie }) {
 }
 
 function MovieDetails({ selectedId, onCloseMovie }) {
+    const [movie, setMovie] = useState({});
+    const [isLoading, setIsLoading] = useState(false);
+
+    const {
+        Title: title,
+        Year: year,
+        Runtime: runtime,
+        Poster: poster,
+        imdbRating,
+        Plot: plot,
+        Released: released,
+        Actors: actors,
+        Director: director,
+        Genre: genre,
+    } = movie;
+
+    useEffect(
+        function () {
+            try {
+                setIsLoading(true);
+                async function searchMovie() {
+                    const res = await fetch(
+                        `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+                    );
+                    const data = await res.json();
+                    setMovie(data);
+                    setIsLoading(false);
+                }
+                searchMovie();
+            } catch (err) {
+                console.error(err);
+            }
+        },
+        [selectedId]
+    );
     return (
         <div className="details">
-            <button onClick={onCloseMovie} className="btn-back">
-                ←
-            </button>
-            {selectedId}
+            {isLoading ? (
+                <Loader />
+            ) : (
+                <>
+                    <header>
+                        <button onClick={onCloseMovie} className="btn-back">
+                            ←
+                        </button>
+                        <img src={poster} alt={title} />
+                        <div className="details-overview">
+                            <h2>{title} </h2>
+                            <p>
+                                {released} &bull; {runtime}
+                            </p>
+                            <p>{genre}</p>
+                            <p>
+                                <span>⭐️</span>
+                                {imdbRating} imdb Ratings
+                            </p>
+                        </div>
+                    </header>
+                    <section>
+                        <div className="rating">
+                            <StarRating maxStar={10} size={24} />
+                        </div>
+                        <p>
+                            <em>{plot}</em>
+                        </p>
+                        <p>Starring: {actors}</p>
+                        <p>Director: {director}</p>
+                    </section>
+                </>
+            )}
         </div>
     );
 }
