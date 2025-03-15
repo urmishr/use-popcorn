@@ -18,7 +18,15 @@ StarRating.propTypes = {
     messages: PropTypes.array,
 };
 
-export default function StarRating({ maxStar = 5, color = "#fcc419", size = 48, messages = [], defaultRatings = 0 }) {
+export default function StarRating({
+    maxStar = 5,
+    color = "#fcc419",
+    size = 48,
+    messages = [],
+    defaultRatings = 0,
+    className = "",
+    onSetRating,
+}) {
     const [ratings, setRatings] = useState(defaultRatings);
     const [tempRatings, setTempRatings] = useState(0);
     const textStyle = {
@@ -27,13 +35,18 @@ export default function StarRating({ maxStar = 5, color = "#fcc419", size = 48, 
         fontSize: `${size / 1.5}px`,
         color: color,
     };
+
+    function handleRating(rating) {
+        setRatings(rating);
+        onSetRating(rating);
+    }
     return (
-        <div style={containerStyle}>
+        <div style={containerStyle} className={className}>
             <div style={starContainerStyle}>
                 {Array.from({ length: maxStar }, (_, i) => (
                     <Star
                         key={i}
-                        onClick={() => setRatings(i + 1)}
+                        onClick={() => handleRating(i + 1)}
                         full={tempRatings ? tempRatings >= i + 1 : ratings >= i + 1}
                         onHoverIn={() => setTempRatings(i + 1)}
                         onHoverOut={() => setTempRatings(0)}
@@ -42,7 +55,11 @@ export default function StarRating({ maxStar = 5, color = "#fcc419", size = 48, 
                     />
                 ))}
             </div>
-            <p style={textStyle}>{messages.length === maxStar ? messages[tempRatings ? tempRatings - 1 : ratings - 1] : tempRatings || ratings || ""}</p>
+            <p style={textStyle}>
+                {messages.length === maxStar
+                    ? messages[tempRatings ? tempRatings - 1 : ratings - 1]
+                    : tempRatings || ratings || ""}
+            </p>
         </div>
     );
 }
@@ -55,13 +72,29 @@ function Star({ onClick, full, onHoverIn, onHoverOut, size, color }) {
         cursor: "pointer",
     };
     return (
-        <span style={starStyle} role="button" onClick={onClick} onMouseEnter={onHoverIn} onMouseLeave={onHoverOut}>
+        <span
+            style={starStyle}
+            role="button"
+            onClick={onClick}
+            onMouseEnter={onHoverIn}
+            onMouseLeave={onHoverOut}
+        >
             {full ? (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill={color} stroke={color}>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill={color}
+                    stroke={color}
+                >
                     <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
             ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke={color}>
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke={color}
+                >
                     <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
