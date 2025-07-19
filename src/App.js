@@ -190,29 +190,13 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchedMovie, watchedMovi
 
     useKey("Escape", onCloseMovie);
 
-    // useEffect(
-    //     function () {
-    //         const callback = (e) => {
-    //             if (e.code === "Escape") {
-    //                 onCloseMovie();
-    //             }
-    //         };
-
-    //         document.addEventListener("keydown", callback);
-    //         return function () {
-    //             document.removeEventListener("keydown", callback);
-    //         };
-    //     },
-    //     [onCloseMovie]
-    // );
-
     useEffect(
         function () {
             try {
                 setIsLoading(true);
                 async function searchMovie() {
                     const res = await fetch(
-                        `http://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
+                        `https://www.omdbapi.com/?apikey=${KEY}&i=${selectedId}`
                     );
                     const data = await res.json();
                     setMovie(data);
@@ -280,6 +264,7 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatchedMovie, watchedMovi
                                         maxStar={10}
                                         size={24}
                                         onSetRating={setUserRatings}
+                                        className="starratings"
                                     />
                                     {userRatings > 0 && (
                                         <button className="btn-add" onClick={handleAdd}>
@@ -348,7 +333,7 @@ function WatchedSummary({ watched }) {
     return (
         <div className="summary">
             <h2>Movies you watched</h2>
-            <div>
+            <div className="movie-summary">
                 <p>
                     <span>#️⃣</span>
                     <span>{watched.length} movies</span>
